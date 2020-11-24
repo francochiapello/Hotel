@@ -26,6 +26,14 @@ public class HabitacionController {
         this.personaService = personaService;
     }
     
+    //Roles gerente (no tiene restriciones)
+    
+    //Roles recepcioniste (transiciones de habitacion, reservarlas, y listado)
+    
+    //Roles cliente(obtener listado de las habitaciones libres y reservarlas)
+    
+    
+    
    //obtener las habitaciones segun su estado(libre, ocupada, mantenimiento, limpieza)
     @GetMapping("/listadoHE")
     public List<Habitaciones>habitacionE(String estado){
@@ -60,7 +68,7 @@ public class HabitacionController {
         return menssage;
     }
     //transicion de estados de habitacion
-    // *GERENTE Y RECEPCIONISTA ROL = 2(con permisos), CLIENTE ROL = 1 (sin permisos)
+    // *GERENTE Y RECEPCIONISTA (con permisos), CLIENTE (sin permisos)
     @RequestMapping("/transicion")
     public String transicionH(@RequestBody Habitaciones habitacion,String role,String estadoAnterior){
         String menssage = "";
@@ -147,13 +155,7 @@ public class HabitacionController {
         }
         return menssage;
     }
-    //Roles gerente (no tiene restriciones)
-    
-    //Roles recepcioniste (transiciones de habitacion, reservarlas, y listado)
-    
-    //Roles cliente(obtener listado de las habitaciones libres y reservarlas)
-    
-    
+
     //crear usuario
     //* crear el modelo personas
     @RequestMapping("/crearU")
