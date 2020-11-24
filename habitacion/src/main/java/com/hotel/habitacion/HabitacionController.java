@@ -5,6 +5,7 @@ import com.hotel.habitacion.domain.Personas;
 import com.hotel.habitacion.service.HabitacionService;
 import com.hotel.habitacion.service.PersonaService;
 import java.util.List;
+import java.util.Set;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -61,15 +62,18 @@ public class HabitacionController {
     //transicion de estados de habitacion
     // *GERENTE Y RECEPCIONISTA ROL = 2(con permisos), CLIENTE ROL = 1 (sin permisos)
     @RequestMapping("/transicion")
-    public String transicionH(@RequestBody Habitaciones habitacion,int role,int estadoAnterior){
+    public String transicionH(@RequestBody Habitaciones habitacion,String role,String estadoAnterior){
         String menssage = "";
         System.out.println(role);
-        if( role == 1){
+        System.out.println(estadoAnterior);
+        System.out.println(habitacion.getEstado());
+        if( !"gerente".equals(role) || !"recepcionista".equals(role)){
             menssage  = "Error 404,no tienes privilegios para esto";
         }else{
             switch (habitacion.getEstado()){
                 case "libre": 
-                    if(estadoAnterior == 4 || estadoAnterior == 3){
+                    if("limpieza".equals(estadoAnterior) || "mantenimiento".equals(estadoAnterior)){
+                        habitacion.setIdReservado(0);
                         habitacionService.transicion(habitacion);
                         menssage = "200,la transciocion se ha realizado con exito";
                     }else{
@@ -78,7 +82,7 @@ public class HabitacionController {
                     break;
                     
                 case "ocupada":
-                    if ( estadoAnterior == 1){
+                    if ( "libre".equals(estadoAnterior)){
                         habitacionService.transicion(habitacion);
                         menssage = "200,la transciocion se ha realizado con exito";
                     }else{
@@ -86,15 +90,15 @@ public class HabitacionController {
                     }
                     break;
                 case "limpieza":
-                    if( estadoAnterior == 2 || estadoAnterior == 3){
+                    if( "ocupada".equals(estadoAnterior) || "matenimiento".equals(estadoAnterior)){
                          habitacionService.transicion(habitacion);
                          menssage = "200,la transciocion se ha realizado con exito";
                     }else{
                         menssage = "Error: codigo 101, no se puede realizar esta transcicion";
                     }
                     break;
-                case "manteniemto":
-                    if( estadoAnterior == 4 || estadoAnterior == 1 || estadoAnterior == 2){
+                case "mantenimiento":
+                    if( ("ocupada".equals(estadoAnterior)) || ("libre".equals(estadoAnterior)) || ("limpieza".equals(estadoAnterior))){
                          habitacionService.transicion(habitacion);
                          menssage = "200,la transciocion se ha realizado con exito";
                     }else{
@@ -116,11 +120,11 @@ public class HabitacionController {
     }   
     //* guardar habitacion
     @PostMapping("/guardarH")
-    public String guardarH(@RequestBody Habitaciones habitacion, int role){
+    public String guardarH(@RequestBody Habitaciones habitacion, String role){
         String menssage = "";
-        if (role == 2){
+        if ("gerente".equals(role)){
              habitacionService.guardar(habitacion);
-            menssage = "good,habitacion guardada";
+            menssage = "200,habitacion guardada con exito";
         }else{
             menssage = "Error 404, usted no tiene privilegios para hacer esta operacion";
         }
@@ -132,12 +136,12 @@ public class HabitacionController {
     //Update habitacion
     
     //Delete habitacion
-    @DeleteMapping("borrarH")
-    public String borrarH(int id, int role){
+    @PostMapping("borrarH")
+    public String borrarH(int id, String role){
         String menssage = "";
-        if (role == 2){
+        if ("gerente".equals(role)){
              habitacionService.borrar(id);
-            menssage = "200,habitacion guardada";
+            menssage = "200,habitacion borrada con exito";
         }else{
             menssage = "Error 404, usted no tiene privilegios para hacer esta operacion";
         }
@@ -184,7 +188,7 @@ public class HabitacionController {
     }
     
     //borrar usuario ID = USUARIO A BORRAR, ROLE = ROL DEL USUARIO
-    @DeleteMapping("/borrarU")
+    @PostMapping("/borrarU")
     public String borrarU(int id, int role){
         String menssage = "";
         if (role == 2){
@@ -197,11 +201,11 @@ public class HabitacionController {
     }
     
     //listar usuarios ROLE = ROL DEL USUARIO
-    @GetMapping("/listarU")
-    public List<Personas> mostrarU(int role){
+    @PostMapping("/listarU")
+    public List<Personas> mostrarU(String role){
          String menssage = "";
          List<Personas> persona = null;
-        if (role == 2){
+        if ("gerente".equals(role)){
             persona = personaService.buscarTodosU();
             menssage = "200,usuarios";
         }else{
